@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Keywriter 🚂
 
-## Getting Started
+**Typing game sulle stazioni ferroviarie italiane.** Scegli una linea, digita il nome di ogni fermata: a ogni lettera corretta il trenino avanza sulla mappa. Arrivi al capolinea, il tabellone ti dice tempo, velocità e precisione.
 
-First, run the development server:
+**▶ Gioca subito: [keywriter-phi.vercel.app](https://keywriter-phi.vercel.app)**
+
+Ispirato ai video di typing "stazione per stazione" sulle linee giapponesi — qui con le ferrovie italiane: dalla Circumvesuviana alle Cinque Terre, dalla Faentina alla tirrenica calabra.
+
+---
+
+## Come si gioca
+
+1. Dal **tabellone partenze** scegli una delle 30 linee (raggruppate per area: Nord-Ovest, Nord-Est, Centro, Sud e Isole).
+2. Sul **cartello blu** appare il nome della prossima stazione: digitalo. Non servono maiuscole, accenti o punteggiatura (`sant'ambrogio` = `sant ambrogio`).
+3. Ogni lettera corretta fa avanzare il **trenino** lungo il binario. Stazione completata → si passa alla successiva, il binario percorso si colora.
+4. Sbagli una lettera? Il cartello lampeggia rosso e le lettere da cancellare restano evidenziate in rosso, con il cursore sempre visibile.
+5. Al capolinea: **tempo totale, WPM e precisione**.
+
+## Screenshot
+
+### Tabellone partenze
+Le 30 linee in stile tabellone Solari, con numero di binario e conteggio fermate.
+
+![Tabellone partenze](docs/tabellone.png)
+
+### In viaggio
+Mappa a tutto schermo, binario percorso colorato, stazioni che si accendono al passaggio, HUD con statistiche in tempo reale.
+
+![Gameplay sulla Genova–La Spezia](docs/gameplay.png)
+
+### Capolinea
+![Schermata di arrivo](docs/capolinea.png)
+
+## Le linee
+
+30 linee reali con fermate locali, 454 stazioni totali. Qualche esempio:
+
+- **Genova → La Spezia** — la riviera di levante e le Cinque Terre, 18 fermate
+- **Napoli → Sorrento** — la Circumvesuviana, con Ercolano e Pompei Scavi
+- **Verona → Brennero** — tutta la valle dell'Adige e dell'Isarco, 21 fermate
+- **Brescia → Edolo** — il lago d'Iseo e la Val Camonica
+- **Firenze → Faenza** — la Faentina, attraverso il Mugello
+- **Roma → Lido di Ostia**, **Torino → Aosta**, **Palermo → Messina**, **Salerno → Sapri**…
+
+> Le coordinate delle stazioni sono approssimate (±1–2 km): abbastanza precise per il gioco, non per la cartografia.
+
+## Design
+
+Estetica ispirata alla segnaletica ferroviaria italiana anni '70–'80:
+
+- **Menu** = tabellone partenze a palette (fondo quasi nero, lettere ambra, righe che entrano a cascata)
+- **Parola da digitare** = cartello di stazione blu smaltato con doppio bordo bianco
+- **Statistiche** = pannello split-flap con scatto a ogni cambio di valore
+- Font: [Archivo](https://fonts.google.com/specimen/Archivo) (segnaletica) + [Fragment Mono](https://fonts.google.com/specimen/Fragment+Mono) (tabelloni)
+- Palette in OKLCH: blu segnaletica, avorio carta, ambra tabellone, rosso FS
+
+## Stack
+
+- [Next.js](https://nextjs.org) (App Router, Turbopack) + React 19 + TypeScript
+- [Tailwind CSS v4](https://tailwindcss.com) con design token custom
+- [Leaflet](https://leafletjs.com) + tile [CARTO Positron](https://carto.com/basemaps) su dati [OpenStreetMap](https://www.openstreetmap.org)
+- Trenino animato con `requestAnimationFrame` e decelerazione esponenziale — nessuna libreria di animazione
+- Nessun backend: tutto statico, deploy su Vercel
+
+## Sviluppo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
+npm run build      # build di produzione
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Aggiungere una linea
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Le linee vivono in [`lib/lines/`](lib/lines), un file per area geografica. Basta aggiungere un oggetto e inserirlo nell'array esportato:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```ts
+{
+  id: "bologna-porretta",
+  label: "Bologna → Porretta Terme",
+  region: "Nord-Est",
+  color: "#92400e",            // colore del binario sulla mappa
+  stations: [
+    { name: "Bologna Centrale", lat: 44.5057, lng: 11.3428 },
+    // ...in ordine di percorrenza
+  ],
+}
+```
 
-## Learn More
+Nient'altro da toccare: menu, mappa e gioco si generano dal dataset.
 
-To learn more about Next.js, take a look at the following resources:
+### Rigenerare gli screenshot del README
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev &
+node scripts/screenshots.mjs   # usa il Chrome di sistema, salva in docs/
+```
