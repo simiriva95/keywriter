@@ -1,26 +1,97 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Palette FS retrò — vedi .impeccable.md */
+  --blu-fs: oklch(0.36 0.11 259);
+  --blu-fs-scuro: oklch(0.28 0.09 259);
+  --avorio: oklch(0.96 0.008 85);
+  --inchiostro: oklch(0.24 0.015 260);
+  --tabellone: oklch(0.21 0.01 260);
+  --tabellone-cella: oklch(0.26 0.012 260);
+  --ambra: oklch(0.78 0.14 75);
+  --ambra-fioca: oklch(0.55 0.08 75);
+  --rosso-fs: oklch(0.52 0.19 27);
+  --bianco-smalto: oklch(0.97 0.005 85);
+  --grigio-binario: oklch(0.75 0.01 259);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-blu-fs: var(--blu-fs);
+  --color-blu-fs-scuro: var(--blu-fs-scuro);
+  --color-avorio: var(--avorio);
+  --color-inchiostro: var(--inchiostro);
+  --color-tabellone: var(--tabellone);
+  --color-tabellone-cella: var(--tabellone-cella);
+  --color-ambra: var(--ambra);
+  --color-ambra-fioca: var(--ambra-fioca);
+  --color-rosso-fs: var(--rosso-fs);
+  --color-bianco-smalto: var(--bianco-smalto);
+  --color-grigio-binario: var(--grigio-binario);
+  --font-sans: var(--font-archivo);
+  --font-mono: var(--font-fragment);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--avorio);
+  color: var(--inchiostro);
+  font-family: var(--font-archivo), system-ui, sans-serif;
+}
+
+/* Tailwind preflight mette max-width:100% sulle img → rompe i tile di leaflet */
+.leaflet-container img {
+  max-width: none !important;
+}
+
+/* Il divIcon del treno non deve avere il box bianco di default */
+.train-icon {
+  background: none;
+  border: none;
+}
+
+/* Errore sul cartello: lampeggio rosso FS */
+@keyframes sign-error {
+  0%, 100% { background-color: var(--blu-fs); }
+  40% { background-color: var(--rosso-fs); }
+}
+.sign-error {
+  animation: sign-error 240ms ease-out;
+}
+
+/* Ingresso a cascata delle righe del tabellone partenze */
+@keyframes board-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.board-row {
+  opacity: 0;
+  animation: board-in 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Cursore di battitura sul cartello */
+@keyframes caret-blink {
+  0%, 45% { opacity: 1; }
+  55%, 100% { opacity: 0; }
+}
+.sign-caret {
+  display: inline-block;
+  width: 3px;
+  height: 0.95em;
+  margin: 0 1px;
+  vertical-align: -0.08em;
+  background: var(--ambra);
+  animation: caret-blink 900ms steps(1) infinite;
+}
+
+/* Flip di cella del tabellone quando cambia valore */
+@keyframes flap {
+  0% { transform: scaleY(1); }
+  50% { transform: scaleY(0.08); }
+  100% { transform: scaleY(1); }
+}
+.flap {
+  animation: flap 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flap, .sign-error { animation: none; }
 }
